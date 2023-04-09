@@ -4,15 +4,18 @@ from typing import Sequence
 
 from gerenciador_activemq import __version__
 from gerenciador_activemq.cli.erros import Erro, ModoNaoImplementado
-from gerenciador_activemq.pocs.ponto_a_ponto import modo_exemplo_ponto_a_ponto
+from gerenciador_activemq.pocs.ponto_a_ponto import (
+    modo_exemplo_ponto_a_ponto_produtor,
+    modo_exemplo_ponto_a_ponto_consumidor,
+)
 
 
 def executa_modo(argumentos: argparse.Namespace):
     if argumentos.modo == "poc_ponto_a_ponto":
         if argumentos.papel == "produtor":
-            modo_exemplo_ponto_a_ponto(papel=argumentos.papel)
+            modo_exemplo_ponto_a_ponto_produtor()
         elif argumentos.papel == "consumidor":
-            modo_exemplo_ponto_a_ponto(papel=argumentos.papel)
+            modo_exemplo_ponto_a_ponto_consumidor()
         else:
             raise ModoNaoImplementado
     else:
