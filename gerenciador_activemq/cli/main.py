@@ -9,7 +9,12 @@ from gerenciador_activemq.pocs.ponto_a_ponto import modo_exemplo_ponto_a_ponto
 
 def executa_modo(argumentos: argparse.Namespace):
     if argumentos.modo == "poc_ponto_a_ponto":
-        modo_exemplo_ponto_a_ponto()
+        if argumentos.papel == "produtor":
+            modo_exemplo_ponto_a_ponto(papel=argumentos.papel)
+        elif argumentos.papel == "consumidor":
+            modo_exemplo_ponto_a_ponto(papel=argumentos.papel)
+        else:
+            raise ModoNaoImplementado
     else:
         raise ModoNaoImplementado
 
@@ -42,12 +47,22 @@ def main(argv: Sequence[str] | None = None):
     subparsers = parser_principal.add_subparsers(dest="modo")
 
     # prova de conceito domínio ponto a ponto
-    subparsers.add_parser(
+    parser_modo_poc_ponto_a_ponto = subparsers.add_parser(
         "poc_ponto_a_ponto", help="poc de domínio ponto a ponto do activeMQ"
+    )
+    subparsers_poc_ponto_a_ponto = parser_modo_poc_ponto_a_ponto.add_subparsers(
+        dest="papel"
+    )
+
+    subparsers_poc_ponto_a_ponto.add_parser(
+        "produtor", help="iniciar poc com papel de produtor"
+    )
+    subparsers_poc_ponto_a_ponto.add_parser(
+        "consumidor", help="iniciar poc com papel de consumidor"
     )
 
     if len(argumentos) == 0:
-        argumentos = ["poc_ponto_a_ponto"]
+        argumentos = ["poc_ponto_a_ponto", "produtor"]
     argumentos_formatados = parser_principal.parse_args(argumentos)
 
     try:
