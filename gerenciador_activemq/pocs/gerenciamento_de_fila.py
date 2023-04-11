@@ -1,13 +1,26 @@
-import time
 import stomp
 
 
 def criar_fila(gerenciador_de_conexao):
-    print("executando criar_fila")
+    nome_da_fila = input("Digite o nome da fila: ")
+
+    gerenciador_de_conexao.send(
+        body="",
+        destination=f"/queue/{nome_da_fila}",
+        headers={"persistent": "true"},
+    )
+    print(f"Fila {nome_da_fila} criada com sucesso")
 
 
 def criar_topico(gerenciador_de_conexao):
-    print("executando criar_topico")
+    nome_do_topico = input("Digite o nome do tópico: ")
+
+    gerenciador_de_conexao.send(
+        body="",
+        destination=f"/topic/{nome_do_topico}",
+        headers={"persistent": "true"},
+    )
+    print(f"Tópico {nome_do_topico} criado com sucesso")
 
 
 def mostrar_quantidade_de_mensagens(gerenciador_de_conexao):
