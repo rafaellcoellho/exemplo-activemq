@@ -13,8 +13,16 @@ def criar_fila(gerenciador_de_conexao: stomp.Connection):
     print("executando criar_fila")
 
 
+def remover_fila(gerenciador_de_conexao: stomp.Connection):
+    print("executando remover_fila")
+
+
 def criar_topico(gerenciador_de_conexao: stomp.Connection):
     print("executando criar_topico")
+
+
+def remover_topico(gerenciador_de_conexao: stomp.Connection):
+    print("executando remover_topico")
 
 
 def modo_exemplo_gerente_da_fila():
@@ -41,10 +49,16 @@ def modo_exemplo_gerente_da_fila():
 
             if opcao == "1":
                 listar_filas_e_qtd_mensagens(gerenciador_de_conexao)
+            if opcao == "2":
+                listar_topicos_e_qtd_mensagens(gerenciador_de_conexao)
             elif opcao == "3":
                 criar_fila(gerenciador_de_conexao)
+            elif opcao == "4":
+                remover_fila(gerenciador_de_conexao)
             elif opcao == "5":
                 criar_topico(gerenciador_de_conexao)
+            elif opcao == "6":
+                remover_topico(gerenciador_de_conexao)
             elif opcao == "0":
                 executando = False
             else:
