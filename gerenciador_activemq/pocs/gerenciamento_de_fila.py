@@ -1,6 +1,4 @@
-import json
-import re
-from typing import Dict, Tuple, Any, List
+from typing import Dict, Any
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -42,13 +40,27 @@ def modo_exemplo_gerente_da_fila():
                 )
                 resposta: Dict[str, Any] = resultado.json()
                 filas: Dict[str, Dict[str, str]] = resposta["value"]
-                print(f"{'Nome da fila':<20} {'Mensagens':<10}")
+                print(f"{'Nome da fila':<50} {'Mensagens':<10}")
                 for fila in filas.values():
                     nome_da_fila: str = fila.get("Name")
                     qtd_mensagens: str = fila.get("QueueSize")
-                    print(f"{nome_da_fila:<20} {qtd_mensagens:<10}")
+                    print(f"{nome_da_fila:<50} {qtd_mensagens:<10}")
             elif opcao == "2":
-                ...
+                resultado: requests.Response = sessao.post(
+                    url=url_base,
+                    json={
+                        "type": "read",
+                        "mbean": f"{objeto_do_broker},destinationType=Topic,destinationName=*",
+                        "attribute": ["Name", "QueueSize"],
+                    },
+                )
+                resposta: Dict[str, Any] = resultado.json()
+                filas: Dict[str, Dict[str, str]] = resposta["value"]
+                print(f"{'Nome do Tópico':<50} {'Mensagens':<10}")
+                for fila in filas.values():
+                    nome_da_fila: str = fila.get("Name")
+                    qtd_mensagens: str = fila.get("QueueSize")
+                    print(f"{nome_da_fila:<50} {qtd_mensagens:<10}")
             elif opcao == "3":
                 nome_da_fila: str = input("Nome da fila: ")
                 resultado: requests.Response = sessao.post(
@@ -80,9 +92,35 @@ def modo_exemplo_gerente_da_fila():
                     print(resultado.json())
                 print("Fila removida com sucesso!")
             elif opcao == "5":
-                ...
+                nome_do_topico: str = input("Nome do tópico: ")
+                resultado: requests.Response = sessao.post(
+                    url=url_base,
+                    json={
+                        "type": "exec",
+                        "mbean": objeto_do_broker,
+                        "operation": "addTopic",
+                        "arguments": [nome_do_topico],
+                    },
+                )
+                if resultado.status_code != 200:
+                    print("Erro ao criar tópico!")
+                    print(resultado.json())
+                print("Tópico criado com sucesso!")
             elif opcao == "6":
-                ...
+                nome_do_topico: str = input("Nome do tópico: ")
+                resultado: requests.Response = sessao.post(
+                    url=url_base,
+                    json={
+                        "type": "exec",
+                        "mbean": objeto_do_broker,
+                        "operation": "removeTopic",
+                        "arguments": [nome_do_topico],
+                    },
+                )
+                if resultado.status_code != 200:
+                    print("Erro ao criar tópico!")
+                    print(resultado.json())
+                print("Tópico criado com sucesso!")
             elif opcao == "0":
                 executando = False
             else:
