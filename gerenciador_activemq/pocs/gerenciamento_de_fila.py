@@ -1,21 +1,50 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 import requests
 from requests.auth import HTTPBasicAuth
 
 
+class GerenciadorDoBroker:
+    def __init__(self):
+        self.url_base: str = "http://127.0.0.1:8161/api/jolokia"
+        self.objeto_do_broker: str = (
+            "org.apache.activemq:type=Broker,brokerName=localhost"
+        )
+
+        self.sessao: requests.Session = requests.Session()
+        self.sessao.headers.update({"Origin": "https://127.0.0.1"})
+        self.sessao.auth = HTTPBasicAuth(username="admin", password="admin")
+
+    def ler_objetos(self, nome_do_objeto: str, atributos: List[str]) -> Any:
+        resultado: requests.Response = self.sessao.post(
+            url=self.url_base,
+            json={
+                "type": "read",
+                "mbean": f"{self.objeto_do_broker},destinationType={nome_do_objeto},destinationName=*",
+                "attribute": atributos,
+            },
+        )
+        return resultado.json()
+
+    def executar_operacao(self, nome_da_operacao: str, argumentos: List[str]) -> Any:
+        resultado: requests.Response = self.sessao.post(
+            url=self.url_base,
+            json={
+                "type": "exec",
+                "mbean": self.objeto_do_broker,
+                "operation": nome_da_operacao,
+                "arguments": argumentos,
+            },
+        )
+        return resultado.json()
+
+
 def obter_recurso_do_broker(
-    sessao: requests.Session, url_base: str, objeto_do_broker: str, recurso: str
+    gerenciador_do_broker: GerenciadorDoBroker, recurso: str
 ) -> Dict[str, Dict[str, str]]:
-    resultado: requests.Response = sessao.post(
-        url=url_base,
-        json={
-            "type": "read",
-            "mbean": f"{objeto_do_broker},destinationType={recurso},destinationName=*",
-            "attribute": ["Name", "QueueSize"],
-        },
+    resposta: Dict[str, Any] = gerenciador_do_broker.ler_objetos(
+        recurso, ["Name", "QueueSize"]
     )
-    resposta: Dict[str, Any] = resultado.json()
     return resposta["value"]
 
 
@@ -28,26 +57,18 @@ def exibir_recurso(recursos: Dict[str, Dict[str, str]], titulo: str):
 
 
 def executar_operacao_no_broker(
-    sessao: requests.Session,
-    url_base: str,
-    objeto_do_broker: str,
+    gerenciador_do_broker: GerenciadorDoBroker,
     operacao: str,
     nome: str,
     msg_sucesso: str,
     msg_erro: str,
 ):
-    resultado: requests.Response = sessao.post(
-        url=url_base,
-        json={
-            "type": "exec",
-            "mbean": objeto_do_broker,
-            "operation": operacao,
-            "arguments": [nome],
-        },
+    resultado: Dict[str, Any] = gerenciador_do_broker.executar_operacao(
+        operacao, [nome]
     )
-    if resultado.status_code != 200:
+    if resultado.get("status") != 200:
         print(f"{msg_erro}!")
-        print(resultado.json())
+        print(resultado)
     else:
         print(f"{msg_sucesso}!")
 
@@ -55,12 +76,7 @@ def executar_operacao_no_broker(
 def modo_exemplo_gerente_da_fila():
     print("Iniciando gerente...")
 
-    url_base: str = "http://127.0.0.1:8161/api/jolokia"
-    objeto_do_broker: str = "org.apache.activemq:type=Broker,brokerName=localhost"
-
-    sessao: requests.Session = requests.Session()
-    sessao.headers.update({"Origin": "https://127.0.0.1"})
-    sessao.auth = HTTPBasicAuth(username="admin", password="admin")
+    gerenciador_activemq = GerenciadorDoBroker()
 
     executando: bool = True
     while executando:
@@ -79,26 +95,20 @@ def modo_exemplo_gerente_da_fila():
 
             if opcao == "1":
                 filas: Dict[str, Dict[str, str]] = obter_recurso_do_broker(
-                    sessao=sessao,
-                    url_base=url_base,
-                    objeto_do_broker=objeto_do_broker,
+                    gerenciador_do_broker=gerenciador_activemq,
                     recurso="Queue",
                 )
                 exibir_recurso(recursos=filas, titulo="Nome da fila")
             elif opcao == "2":
                 topicos: Dict[str, Dict[str, str]] = obter_recurso_do_broker(
-                    sessao=sessao,
-                    url_base=url_base,
-                    objeto_do_broker=objeto_do_broker,
+                    gerenciador_do_broker=gerenciador_activemq,
                     recurso="Topic",
                 )
                 exibir_recurso(recursos=topicos, titulo="Nome do Tópico")
             elif opcao == "3":
                 nome_da_fila: str = input("Nome da fila: ")
                 executar_operacao_no_broker(
-                    sessao=sessao,
-                    url_base=url_base,
-                    objeto_do_broker=objeto_do_broker,
+                    gerenciador_do_broker=gerenciador_activemq,
                     operacao="addQueue",
                     nome=nome_da_fila,
                     msg_sucesso="Fila criada com sucesso!",
@@ -107,9 +117,7 @@ def modo_exemplo_gerente_da_fila():
             elif opcao == "4":
                 nome_da_fila: str = input("Nome da fila: ")
                 executar_operacao_no_broker(
-                    sessao=sessao,
-                    url_base=url_base,
-                    objeto_do_broker=objeto_do_broker,
+                    gerenciador_do_broker=gerenciador_activemq,
                     operacao="removeQueue",
                     nome=nome_da_fila,
                     msg_sucesso="Fila removida com sucesso!",
@@ -118,9 +126,7 @@ def modo_exemplo_gerente_da_fila():
             elif opcao == "5":
                 nome_do_topico: str = input("Nome do tópico: ")
                 executar_operacao_no_broker(
-                    sessao=sessao,
-                    url_base=url_base,
-                    objeto_do_broker=objeto_do_broker,
+                    gerenciador_do_broker=gerenciador_activemq,
                     operacao="addTopic",
                     nome=nome_do_topico,
                     msg_sucesso="Tópico criado com sucesso!",
@@ -129,9 +135,7 @@ def modo_exemplo_gerente_da_fila():
             elif opcao == "6":
                 nome_do_topico: str = input("Nome do tópico: ")
                 executar_operacao_no_broker(
-                    sessao=sessao,
-                    url_base=url_base,
-                    objeto_do_broker=objeto_do_broker,
+                    gerenciador_do_broker=gerenciador_activemq,
                     operacao="removeTopic",
                     nome=nome_do_topico,
                     msg_sucesso="Tópico removido com sucesso!",
