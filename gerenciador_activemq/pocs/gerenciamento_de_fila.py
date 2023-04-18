@@ -1,7 +1,55 @@
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 import requests
 from requests.auth import HTTPBasicAuth
+
+
+def obter_recurso_do_broker(
+    sessao: requests.Session, url_base: str, objeto_do_broker: str, recurso: str
+) -> Dict[str, Dict[str, str]]:
+    resultado: requests.Response = sessao.post(
+        url=url_base,
+        json={
+            "type": "read",
+            "mbean": f"{objeto_do_broker},destinationType={recurso},destinationName=*",
+            "attribute": ["Name", "QueueSize"],
+        },
+    )
+    resposta: Dict[str, Any] = resultado.json()
+    return resposta["value"]
+
+
+def exibir_recurso(recursos: Dict[str, Dict[str, str]], titulo: str):
+    print(f"{titulo:<50} {'Mensagens':<10}")
+    for recurso in recursos.values():
+        nome: Optional[str] = recurso.get("Name")
+        qtd_mensagens: Optional[str] = recurso.get("QueueSize")
+        print(f"{nome:<50} {qtd_mensagens:<10}")
+
+
+def executar_operacao_no_broker(
+    sessao: requests.Session,
+    url_base: str,
+    objeto_do_broker: str,
+    operacao: str,
+    nome: str,
+    msg_sucesso: str,
+    msg_erro: str,
+):
+    resultado: requests.Response = sessao.post(
+        url=url_base,
+        json={
+            "type": "exec",
+            "mbean": objeto_do_broker,
+            "operation": operacao,
+            "arguments": [nome],
+        },
+    )
+    if resultado.status_code != 200:
+        print(f"{msg_erro}!")
+        print(resultado.json())
+    else:
+        print(f"{msg_sucesso}!")
 
 
 def modo_exemplo_gerente_da_fila():
@@ -30,97 +78,65 @@ def modo_exemplo_gerente_da_fila():
             opcao: str = input("Escolha uma opção: ")
 
             if opcao == "1":
-                resultado: requests.Response = sessao.post(
-                    url=url_base,
-                    json={
-                        "type": "read",
-                        "mbean": f"{objeto_do_broker},destinationType=Queue,destinationName=*",
-                        "attribute": ["Name", "QueueSize"],
-                    },
+                filas: Dict[str, Dict[str, str]] = obter_recurso_do_broker(
+                    sessao=sessao,
+                    url_base=url_base,
+                    objeto_do_broker=objeto_do_broker,
+                    recurso="Queue",
                 )
-                resposta: Dict[str, Any] = resultado.json()
-                filas: Dict[str, Dict[str, str]] = resposta["value"]
-                print(f"{'Nome da fila':<50} {'Mensagens':<10}")
-                for fila in filas.values():
-                    nome_da_fila: str = fila.get("Name")
-                    qtd_mensagens: str = fila.get("QueueSize")
-                    print(f"{nome_da_fila:<50} {qtd_mensagens:<10}")
+                exibir_recurso(recursos=filas, titulo="Nome da fila")
             elif opcao == "2":
-                resultado: requests.Response = sessao.post(
-                    url=url_base,
-                    json={
-                        "type": "read",
-                        "mbean": f"{objeto_do_broker},destinationType=Topic,destinationName=*",
-                        "attribute": ["Name", "QueueSize"],
-                    },
+                topicos: Dict[str, Dict[str, str]] = obter_recurso_do_broker(
+                    sessao=sessao,
+                    url_base=url_base,
+                    objeto_do_broker=objeto_do_broker,
+                    recurso="Topic",
                 )
-                resposta: Dict[str, Any] = resultado.json()
-                filas: Dict[str, Dict[str, str]] = resposta["value"]
-                print(f"{'Nome do Tópico':<50} {'Mensagens':<10}")
-                for fila in filas.values():
-                    nome_da_fila: str = fila.get("Name")
-                    qtd_mensagens: str = fila.get("QueueSize")
-                    print(f"{nome_da_fila:<50} {qtd_mensagens:<10}")
+                exibir_recurso(recursos=topicos, titulo="Nome do Tópico")
             elif opcao == "3":
                 nome_da_fila: str = input("Nome da fila: ")
-                resultado: requests.Response = sessao.post(
-                    url=url_base,
-                    json={
-                        "type": "exec",
-                        "mbean": objeto_do_broker,
-                        "operation": "addQueue",
-                        "arguments": [nome_da_fila],
-                    },
+                executar_operacao_no_broker(
+                    sessao=sessao,
+                    url_base=url_base,
+                    objeto_do_broker=objeto_do_broker,
+                    operacao="addQueue",
+                    nome=nome_da_fila,
+                    msg_sucesso="Fila criada com sucesso!",
+                    msg_erro="Erro ao criar fila!",
                 )
-                if resultado.status_code != 200:
-                    print("Erro ao criar fila!")
-                    print(resultado.json())
-                print("Fila criada com sucesso!")
             elif opcao == "4":
                 nome_da_fila: str = input("Nome da fila: ")
-                resultado: requests.Response = sessao.post(
-                    url=url_base,
-                    json={
-                        "type": "exec",
-                        "mbean": objeto_do_broker,
-                        "operation": "removeQueue",
-                        "arguments": [nome_da_fila],
-                    },
+                executar_operacao_no_broker(
+                    sessao=sessao,
+                    url_base=url_base,
+                    objeto_do_broker=objeto_do_broker,
+                    operacao="removeQueue",
+                    nome=nome_da_fila,
+                    msg_sucesso="Fila removida com sucesso!",
+                    msg_erro="Erro ao remover fila!",
                 )
-                if resultado.status_code != 200:
-                    print("Erro ao remover fila!")
-                    print(resultado.json())
-                print("Fila removida com sucesso!")
             elif opcao == "5":
                 nome_do_topico: str = input("Nome do tópico: ")
-                resultado: requests.Response = sessao.post(
-                    url=url_base,
-                    json={
-                        "type": "exec",
-                        "mbean": objeto_do_broker,
-                        "operation": "addTopic",
-                        "arguments": [nome_do_topico],
-                    },
+                executar_operacao_no_broker(
+                    sessao=sessao,
+                    url_base=url_base,
+                    objeto_do_broker=objeto_do_broker,
+                    operacao="addTopic",
+                    nome=nome_do_topico,
+                    msg_sucesso="Tópico criado com sucesso!",
+                    msg_erro="Erro ao criar tópico!",
                 )
-                if resultado.status_code != 200:
-                    print("Erro ao criar tópico!")
-                    print(resultado.json())
-                print("Tópico criado com sucesso!")
             elif opcao == "6":
                 nome_do_topico: str = input("Nome do tópico: ")
-                resultado: requests.Response = sessao.post(
-                    url=url_base,
-                    json={
-                        "type": "exec",
-                        "mbean": objeto_do_broker,
-                        "operation": "removeTopic",
-                        "arguments": [nome_do_topico],
-                    },
+                executar_operacao_no_broker(
+                    sessao=sessao,
+                    url_base=url_base,
+                    objeto_do_broker=objeto_do_broker,
+                    operacao="removeTopic",
+                    nome=nome_do_topico,
+                    msg_sucesso="Tópico removido com sucesso!",
+                    msg_erro="Erro ao remover tópico!",
                 )
-                if resultado.status_code != 200:
-                    print("Erro ao criar tópico!")
-                    print(resultado.json())
-                print("Tópico criado com sucesso!")
             elif opcao == "0":
                 executando = False
             else:
