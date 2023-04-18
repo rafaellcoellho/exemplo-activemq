@@ -148,4 +148,31 @@ def modo_exemplo_gerente_da_fila():
 
 
 def modo_exemplo_cliente_da_fila():
-    print(f"cliente")
+    print(f"Iniciando cliente...")
+
+    executando: bool = True
+    while executando:
+        try:
+            print("==================================================")
+            print("1 - Assinar tópico")
+            print("2 - Enviar mensagem para fila")
+            print("3 - Enviar mensagem para topico")
+            print("0 - Sair")
+            print("==================================================")
+
+            opcao: str = input("Escolha uma opção: ")
+
+            if opcao == "1":
+                ...
+            elif opcao == "2":
+                ...
+            elif opcao == "3":
+                ...
+            elif opcao == "0":
+                executando = False
+            else:
+                print("Opção inválida")
+        except KeyboardInterrupt:
+            executando = False
+
+    print("Encerrando cliente...")
