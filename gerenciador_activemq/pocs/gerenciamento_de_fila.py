@@ -1,6 +1,7 @@
 from typing import Dict, Any, Optional, List
 
 import requests
+import stomp
 from requests.auth import HTTPBasicAuth
 
 
@@ -39,11 +40,39 @@ class GerenciadorDoBroker:
         return resultado.json()
 
 
+class OuvinteDeMensagens(stomp.ConnectionListener):
+    def __init__(self, gerenciador_de_cliente: stomp.Connection, nome_do_cliente: str):
+        self.nome_do_cliente: str = nome_do_cliente
+        self.gerenciador_de_cliente: stomp.Connection = gerenciador_de_cliente
+
+    def on_error(self, pacote):
+        print("Erro:")
+        print(f"\n{pacote}")
+        print("Escolha uma opção: ", end="")
+
+    def on_message(self, pacote):
+        destino: str = pacote.headers["destination"]
+        remetente: str = pacote.headers["sender"]
+        mensagem: str = pacote.body
+
+        if destino == f"/queue/{self.nome_do_cliente}":
+            self.gerenciador_de_cliente.ack(
+                id=pacote.headers["message-id"],
+                subscription=pacote.headers["subscription"],
+            )
+
+        print(f"\n{remetente} disse: {mensagem}", end=" ")
+        print("\nEscolha uma opção: ", end="", flush=True)
+
+    def on_disconnected(self):
+        print("Desconectado...")
+
+
 def obter_recurso_do_broker(
     gerenciador_do_broker: GerenciadorDoBroker, recurso: str
 ) -> Dict[str, Dict[str, str]]:
     resposta: Dict[str, Any] = gerenciador_do_broker.ler_objetos(
-        recurso, ["Name", "QueueSize"]
+        recurso, ["Name", "EnqueueCount"]
     )
     return resposta["value"]
 
@@ -52,7 +81,7 @@ def exibir_recurso(recursos: Dict[str, Dict[str, str]], titulo: str):
     print(f"{titulo:<50} {'Mensagens':<10}")
     for recurso in recursos.values():
         nome: Optional[str] = recurso.get("Name")
-        qtd_mensagens: Optional[str] = recurso.get("QueueSize")
+        qtd_mensagens: Optional[str] = recurso.get("EnqueueCount")
         print(f"{nome:<50} {qtd_mensagens:<10}")
 
 
@@ -153,6 +182,22 @@ def modo_exemplo_gerente_da_fila():
 
 def modo_exemplo_cliente_da_fila():
     print(f"Iniciando cliente...")
+    nome_do_cliente: str = input("Nome do cliente: ")
+
+    gerenciador_cliente: stomp.Connection = stomp.Connection()
+    gerenciador_cliente.set_listener(
+        name="ouvinte",
+        listener=OuvinteDeMensagens(
+            gerenciador_de_cliente=gerenciador_cliente,
+            nome_do_cliente=nome_do_cliente,
+        ),
+    )
+    gerenciador_cliente.connect(username="admin", passcode="admin")
+    gerenciador_cliente.subscribe(
+        destination=f"/queue/{nome_do_cliente}",
+        id=nome_do_cliente,
+        ack="client-individual",
+    )
 
     executando: bool = True
     while executando:
@@ -167,11 +212,27 @@ def modo_exemplo_cliente_da_fila():
             opcao: str = input("Escolha uma opção: ")
 
             if opcao == "1":
-                ...
+                topico: str = input("Nome do tópico: ")
+                gerenciador_cliente.subscribe(
+                    destination=f"/topic/{topico}",
+                    id=topico,
+                )
             elif opcao == "2":
-                ...
+                fila: str = input("Nome da fila: ")
+                mensagem: str = input("Mensagem: ")
+                gerenciador_cliente.send(
+                    destination=f"/queue/{fila}",
+                    body=mensagem,
+                    headers={"sender": nome_do_cliente},
+                )
             elif opcao == "3":
-                ...
+                topico: str = input("Nome do tópico: ")
+                mensagem: str = input("Mensagem: ")
+                gerenciador_cliente.send(
+                    destination=f"/topic/{topico}",
+                    body=mensagem,
+                    headers={"sender": nome_do_cliente},
+                )
             elif opcao == "0":
                 executando = False
             else:
@@ -180,3 +241,4 @@ def modo_exemplo_cliente_da_fila():
             executando = False
 
     print("Encerrando cliente...")
+    gerenciador_cliente.disconnect()
