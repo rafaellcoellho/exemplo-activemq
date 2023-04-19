@@ -4,15 +4,18 @@ from typing import Sequence
 
 from gerenciador_activemq import __version__
 from gerenciador_activemq.cli.erros import Erro, ModoNaoImplementado
-from gerenciador_activemq.pocs.ponto_a_ponto import modo_exemplo_ponto_a_ponto
+from gerenciador_activemq.pocs.gerenciamento_de_fila import (
+    modo_exemplo_gerente_da_fila,
+    modo_exemplo_cliente_da_fila,
+)
 
 
 def executa_modo(argumentos: argparse.Namespace):
-    if argumentos.modo == "poc_ponto_a_ponto":
-        if argumentos.papel == "produtor":
-            modo_exemplo_ponto_a_ponto(papel=argumentos.papel)
-        elif argumentos.papel == "consumidor":
-            modo_exemplo_ponto_a_ponto(papel=argumentos.papel)
+    if argumentos.modo == "poc_gerenciamento_de_fila":
+        if argumentos.papel == "gerente":
+            modo_exemplo_gerente_da_fila()
+        elif argumentos.papel == "cliente":
+            modo_exemplo_cliente_da_fila()
         else:
             raise ModoNaoImplementado
     else:
@@ -46,23 +49,23 @@ def main(argv: Sequence[str] | None = None):
 
     subparsers = parser_principal.add_subparsers(dest="modo")
 
-    # prova de conceito domínio ponto a ponto
-    parser_modo_poc_ponto_a_ponto = subparsers.add_parser(
-        "poc_ponto_a_ponto", help="poc de domínio ponto a ponto do activeMQ"
+    # prova de conceito de gerenciamento de filas
+    parser_modo_poc_gerenciador_de_fila = subparsers.add_parser(
+        "poc_gerenciamento_de_fila", help="poc de gerenciamento de filas do activeMQ"
     )
-    subparsers_poc_ponto_a_ponto = parser_modo_poc_ponto_a_ponto.add_subparsers(
-        dest="papel"
+    subparsers_poc_gerenciador_de_fila = (
+        parser_modo_poc_gerenciador_de_fila.add_subparsers(dest="papel")
     )
 
-    subparsers_poc_ponto_a_ponto.add_parser(
-        "produtor", help="iniciar poc com papel de produtor"
+    subparsers_poc_gerenciador_de_fila.add_parser(
+        "gerente", help="iniciar poc com papel de gerenciar o broker"
     )
-    subparsers_poc_ponto_a_ponto.add_parser(
-        "consumidor", help="iniciar poc com papel de consumidor"
+    subparsers_poc_gerenciador_de_fila.add_parser(
+        "cliente", help="iniciar poc com papel de cliente do sistema de filas"
     )
 
     if len(argumentos) == 0:
-        argumentos = ["poc_ponto_a_ponto", "produtor"]
+        argumentos = ["poc_gerenciamento_de_fila", "gerente"]
     argumentos_formatados = parser_principal.parse_args(argumentos)
 
     try:
