@@ -1,3 +1,4 @@
+import sys
 from typing import Dict, Any, Optional, List
 
 import requests
@@ -242,3 +243,14 @@ def modo_exemplo_cliente_da_fila():
 
     print("Encerrando cliente...")
     gerenciador_cliente.disconnect()
+
+
+if __name__ == "__main__":
+    modo = sys.argv[1]
+
+    if modo == "gerente":
+        modo_exemplo_gerente_da_fila()
+    elif modo == "cliente":
+        modo_exemplo_cliente_da_fila()
+    else:
+        print("modo não reconhecido")
