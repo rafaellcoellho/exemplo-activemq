@@ -40,11 +40,11 @@ class InterfaceGerenciamentoDeFilas:
         self.frame_principal: tkinter.Frame = tkinter.Frame(motor_interface_grafica)
         self.frame_principal.grid(row=0, column=0)
 
-        self.configurar_interface_para_adicionar_nova_fila()
-        self.configurar_interface_para_listar_filas()
-        self.configurar_interface_para_remover_fila()
+        self._configurar_interface_para_adicionar_nova_fila()
+        self._configurar_interface_para_listar_filas()
+        self._configurar_interface_para_remover_fila()
 
-    def configurar_interface_para_adicionar_nova_fila(self):
+    def _configurar_interface_para_adicionar_nova_fila(self):
         frame_interface_adicionar_fila: tkinter.Frame = tkinter.Frame(
             self.frame_principal
         )
@@ -69,10 +69,10 @@ class InterfaceGerenciamentoDeFilas:
         )
         botao_para_adicionar_fila.grid(row=0, column=2)
 
-    def configurar_interface_para_listar_filas(self):
+    def _configurar_interface_para_listar_filas(self):
         ...
 
-    def configurar_interface_para_remover_fila(self):
+    def _configurar_interface_para_remover_fila(self):
         ...
 
 
