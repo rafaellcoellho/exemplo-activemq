@@ -164,6 +164,19 @@ class InterfaceGerenciamentoDeRecursos:
         )
 
 
+class InterfaceCliente:
+    def __init__(
+        self, motor_interface_grafica: tkinter.Tk, frame_principal: tkinter.LabelFrame
+    ):
+        self.motor_interface_grafica: tkinter.Tk = motor_interface_grafica
+        self.frame_principal: tkinter.LabelFrame = frame_principal
+
+
+def instanciar_novo_cliente(motor_interface_grafica: tkinter.Tk):
+    nova_janela = tkinter.Toplevel(motor_interface_grafica)
+    nova_janela.title("Novo Cliente")
+
+
 def modo_exemplo_interface_grafica():
     gerenciador_de_filas: GerenciadorDeRecursos = GerenciadorDeRecursos()
     gerenciador_de_topicos: GerenciadorDeRecursos = GerenciadorDeRecursos()
@@ -197,6 +210,12 @@ def modo_exemplo_interface_grafica():
         )
     )
 
+    botao_para_criar_novo_cliente: tkinter.Button = tkinter.Button(
+        motor_interface_grafica,
+        text="Criar novo cliente",
+        command=lambda: instanciar_novo_cliente(motor_interface_grafica),
+    )
+    botao_para_criar_novo_cliente.grid(row=1, column=0, columnspan=2, padx=10, pady=10)
     motor_interface_grafica.mainloop()
 
 
