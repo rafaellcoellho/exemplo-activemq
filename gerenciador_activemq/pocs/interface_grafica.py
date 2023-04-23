@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Dict, List, NewType, Tuple, Optional, Callable
 
 
-class NomeDaFila(str):
+class NomeDoRecurso(str):
     def __new__(cls, nome: str):
         if len(nome) < 1:
             raise ValueError("Nome da fila não pode ser vazio")
@@ -13,24 +13,24 @@ class NomeDaFila(str):
 
 
 @dataclass
-class Fila:
-    nome: NomeDaFila
+class Recurso:
+    nome: NomeDoRecurso
     quantidade_de_mensagens: int = 0
 
 
-class GerenciadorDeFilas:
+class GerenciadorDeRecursos:
     def __init__(self):
-        self.filas: Dict[NomeDaFila, Fila] = {}
+        self.recursos: Dict[NomeDoRecurso, Recurso] = {}
 
-    def adicionar_fila(self, fila: Fila):
-        if fila.nome in self.filas:
-            raise ValueError("Fila já existe")
-        self.filas[fila.nome] = fila
+    def adicionar_recurso(self, recurso: Recurso):
+        if recurso.nome in self.recursos:
+            raise ValueError("Recurso já existe")
+        self.recursos[recurso.nome] = recurso
 
-    def remover_fila(self, nome_da_fila: NomeDaFila):
-        if nome_da_fila not in self.filas.keys():
-            raise ValueError("Fila não existe")
-        del self.filas[nome_da_fila]
+    def remover_recurso(self, nome_do_recurso: NomeDoRecurso):
+        if nome_do_recurso not in self.recursos.keys():
+            raise ValueError("Recurso não existe")
+        del self.recursos[nome_do_recurso]
 
 
 class TabelaTkinter(tkinter.Frame):
@@ -40,13 +40,13 @@ class TabelaTkinter(tkinter.Frame):
         self,
         widget_parent: tkinter.Misc | None,
         cabecalho: Linha,
-        callback_ao_remover_fila: Callable,
+        callback_ao_remover_recurso: Callable,
     ):
         super().__init__(widget_parent)
         self._cabecalho: TabelaTkinter.Linha = cabecalho
         self._linhas: List[TabelaTkinter.Linha] = []
         self._widgets_das_linhas: List[tkinter.Widget] = []
-        self._callback_ao_remover_fila: Callable = callback_ao_remover_fila
+        self._callback_ao_remover_recurso: Callable = callback_ao_remover_recurso
         self._configurar_interface()
 
     def _configurar_interface(self):
@@ -87,7 +87,7 @@ class TabelaTkinter(tkinter.Frame):
         for widget in self._widgets_das_linhas:
             widget.destroy()
         self._configurar_interface()
-        self._callback_ao_remover_fila(nome_da_fila=NomeDaFila(linha[0]))
+        self._callback_ao_remover_recurso(nome_da_fila=NomeDoRecurso(linha[0]))
 
     def adiciona_linha(self, linha: Linha):
         self._linhas.append(linha)
@@ -96,82 +96,88 @@ class TabelaTkinter(tkinter.Frame):
         self._configurar_interface()
 
 
-class InterfaceGerenciamentoDeFilas:
+class InterfaceGerenciamentoDeRecursos:
     def __init__(
         self,
         motor_interface_grafica: tkinter.Tk,
-        gerenciador_de_filas: GerenciadorDeFilas,
+        gerenciador_de_recursos: GerenciadorDeRecursos,
     ):
         self.motor_interface_grafica: tkinter.Tk = motor_interface_grafica
-        self.gerenciador_de_filas: GerenciadorDeFilas = gerenciador_de_filas
+        self.gerenciador_de_recursos: GerenciadorDeRecursos = gerenciador_de_recursos
 
         self.frame_principal: tkinter.LabelFrame = tkinter.LabelFrame(
             motor_interface_grafica,
             text="gerenciamento de filas",
         )
         self.frame_principal.grid(row=0, column=0, padx=10, pady=10)
-        self.tabela_de_filas: Optional[TabelaTkinter] = None
-        self.entrada_para_nome_da_fila: Optional[tkinter.Entry] = None
+        self.tabela_de_recursos: Optional[TabelaTkinter] = None
+        self.entrada_para_nome_do_recurso: Optional[tkinter.Entry] = None
 
-        self._configurar_interface_para_adicionar_nova_fila()
-        self._configurar_interface_para_listar_filas()
+        self._configurar_interface_para_adicionar_novo_recurso()
+        self._configurar_interface_para_listar_recurso()
 
-    def _configurar_interface_para_adicionar_nova_fila(self):
-        frame_interface_adicionar_fila: tkinter.Frame = tkinter.Frame(
+    def _configurar_interface_para_adicionar_novo_recurso(self):
+        frame_interface_adicionar_recurso: tkinter.Frame = tkinter.Frame(
             self.frame_principal
         )
-        frame_interface_adicionar_fila.grid(row=0, column=0, padx=10, pady=10)
+        frame_interface_adicionar_recurso.grid(row=0, column=0, padx=10, pady=10)
 
-        label_para_nome_da_fila: tkinter.Label = tkinter.Label(
-            frame_interface_adicionar_fila, text="Nome da fila:"
+        label_para_nome_do_recurso: tkinter.Label = tkinter.Label(
+            frame_interface_adicionar_recurso, text="Nome da fila:"
         )
-        label_para_nome_da_fila.grid(row=0, column=0)
+        label_para_nome_do_recurso.grid(row=0, column=0)
 
-        self.entrada_para_nome_da_fila = tkinter.Entry(frame_interface_adicionar_fila)
-        self.entrada_para_nome_da_fila.grid(row=0, column=1)
+        self.entrada_para_nome_do_recurso = tkinter.Entry(
+            frame_interface_adicionar_recurso
+        )
+        self.entrada_para_nome_do_recurso.grid(row=0, column=1)
 
-        botao_para_adicionar_fila: tkinter.Button = tkinter.Button(
-            frame_interface_adicionar_fila,
+        botao_para_adicionar_recurso: tkinter.Button = tkinter.Button(
+            frame_interface_adicionar_recurso,
             text="Adicionar",
-            command=lambda: self._adicionar_fila(
-                nome_da_fila=self.entrada_para_nome_da_fila.get()
+            command=lambda: self._adicionar_recurso(
+                nome_da_fila=self.entrada_para_nome_do_recurso.get()
             ),
         )
-        botao_para_adicionar_fila.grid(row=0, column=2)
+        botao_para_adicionar_recurso.grid(row=0, column=2)
 
-    def _configurar_interface_para_listar_filas(self):
-        self.tabela_de_filas = TabelaTkinter(
+    def _configurar_interface_para_listar_recurso(self):
+        self.tabela_de_recursos = TabelaTkinter(
             self.frame_principal,
             cabecalho=TabelaTkinter.Linha(["Nome", "Mensagens"]),
-            callback_ao_remover_fila=self._remover_fila,
+            callback_ao_remover_recurso=self._remover_recurso,
         )
-        self.tabela_de_filas.grid(row=1, column=0, padx=10, pady=10)
+        self.tabela_de_recursos.grid(row=1, column=0, padx=10, pady=10)
 
-    def _adicionar_fila(self, nome_da_fila: str):
-        fila: Fila = Fila(nome=NomeDaFila(nome_da_fila))
-        self.gerenciador_de_filas.adicionar_fila(fila=fila)
-        if self.tabela_de_filas is not None:
-            self.tabela_de_filas.adiciona_linha(
+    def _adicionar_recurso(self, nome_da_fila: str):
+        fila: Recurso = Recurso(nome=NomeDoRecurso(nome_da_fila))
+        self.gerenciador_de_recursos.adicionar_recurso(recurso=fila)
+        if self.tabela_de_recursos is not None:
+            self.tabela_de_recursos.adiciona_linha(
                 TabelaTkinter.Linha([fila.nome, str(fila.quantidade_de_mensagens)])
             )
-        if self.entrada_para_nome_da_fila is not None:
-            self.entrada_para_nome_da_fila.delete(0, tkinter.END)
+        if self.entrada_para_nome_do_recurso is not None:
+            self.entrada_para_nome_do_recurso.delete(0, tkinter.END)
 
-    def _remover_fila(self, nome_da_fila: str):
-        self.gerenciador_de_filas.remover_fila(nome_da_fila=NomeDaFila(nome_da_fila))
+    def _remover_recurso(self, nome_da_fila: str):
+        self.gerenciador_de_recursos.remover_recurso(
+            nome_do_recurso=NomeDoRecurso(nome_da_fila)
+        )
 
 
 def modo_exemplo_interface_grafica():
-    gerenciador_de_filas: GerenciadorDeFilas = GerenciadorDeFilas()
-    gerenciador_de_filas.adicionar_fila(fila=Fila(nome=NomeDaFila("Fila 1")))
+    gerenciador_de_filas: GerenciadorDeRecursos = GerenciadorDeRecursos()
+    gerenciador_de_filas.adicionar_recurso(
+        recurso=Recurso(nome=NomeDoRecurso("Fila 1"))
+    )
 
     motor_interface_grafica: tkinter.Tk = tkinter.Tk()
     motor_interface_grafica.title("Poc Interface Grafica")
 
-    interface_gerenciamento_de_filas: InterfaceGerenciamentoDeFilas = (
-        InterfaceGerenciamentoDeFilas(
+    interface_gerenciamento_de_filas: InterfaceGerenciamentoDeRecursos = (
+        InterfaceGerenciamentoDeRecursos(
             motor_interface_grafica=motor_interface_grafica,
-            gerenciador_de_filas=gerenciador_de_filas,
+            gerenciador_de_recursos=gerenciador_de_filas,
         )
     )
 
