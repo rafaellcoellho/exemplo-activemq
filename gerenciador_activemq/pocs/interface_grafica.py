@@ -37,8 +37,11 @@ class InterfaceGerenciamentoDeFilas:
         self.motor_interface_grafica: tkinter.Tk = motor_interface_grafica
         self.gerenciador_de_filas: GerenciadorDeFilas = gerenciador_de_filas
 
-        self.frame_principal: tkinter.Frame = tkinter.Frame(motor_interface_grafica)
-        self.frame_principal.grid(row=0, column=0)
+        self.frame_principal: tkinter.LabelFrame = tkinter.LabelFrame(
+            motor_interface_grafica,
+            text="gerenciamento de filas",
+        )
+        self.frame_principal.grid(row=0, column=0, padx=10, pady=10)
 
         self._configurar_interface_para_adicionar_nova_fila()
         self._configurar_interface_para_listar_filas()
@@ -48,7 +51,7 @@ class InterfaceGerenciamentoDeFilas:
         frame_interface_adicionar_fila: tkinter.Frame = tkinter.Frame(
             self.frame_principal
         )
-        frame_interface_adicionar_fila.grid(row=0, column=0)
+        frame_interface_adicionar_fila.grid(row=0, column=0, padx=10, pady=10)
 
         label_para_nome_da_fila: tkinter.Label = tkinter.Label(
             frame_interface_adicionar_fila, text="Nome da fila:"
