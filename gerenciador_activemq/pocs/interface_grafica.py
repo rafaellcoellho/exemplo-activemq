@@ -101,17 +101,16 @@ class InterfaceGerenciamentoDeRecursos:
         self,
         motor_interface_grafica: tkinter.Tk,
         gerenciador_de_recursos: GerenciadorDeRecursos,
+        frame_principal: tkinter.LabelFrame,
+        nome_do_recurso: str,
     ):
         self.motor_interface_grafica: tkinter.Tk = motor_interface_grafica
         self.gerenciador_de_recursos: GerenciadorDeRecursos = gerenciador_de_recursos
 
-        self.frame_principal: tkinter.LabelFrame = tkinter.LabelFrame(
-            motor_interface_grafica,
-            text="gerenciamento de filas",
-        )
-        self.frame_principal.grid(row=0, column=0, padx=10, pady=10)
+        self.frame_principal: tkinter.LabelFrame = frame_principal
         self.tabela_de_recursos: Optional[TabelaTkinter] = None
         self.entrada_para_nome_do_recurso: Optional[tkinter.Entry] = None
+        self.nome_do_recurso: str = nome_do_recurso
 
         self._configurar_interface_para_adicionar_novo_recurso()
         self._configurar_interface_para_listar_recurso()
@@ -123,7 +122,7 @@ class InterfaceGerenciamentoDeRecursos:
         frame_interface_adicionar_recurso.grid(row=0, column=0, padx=10, pady=10)
 
         label_para_nome_do_recurso: tkinter.Label = tkinter.Label(
-            frame_interface_adicionar_recurso, text="Nome da fila:"
+            frame_interface_adicionar_recurso, text=f"Nome da {self.nome_do_recurso}:"
         )
         label_para_nome_do_recurso.grid(row=0, column=0)
 
@@ -167,17 +166,34 @@ class InterfaceGerenciamentoDeRecursos:
 
 def modo_exemplo_interface_grafica():
     gerenciador_de_filas: GerenciadorDeRecursos = GerenciadorDeRecursos()
-    gerenciador_de_filas.adicionar_recurso(
-        recurso=Recurso(nome=NomeDoRecurso("Fila 1"))
-    )
+    gerenciador_de_topicos: GerenciadorDeRecursos = GerenciadorDeRecursos()
 
     motor_interface_grafica: tkinter.Tk = tkinter.Tk()
     motor_interface_grafica.title("Poc Interface Grafica")
 
+    frame_principal_filas: tkinter.LabelFrame = tkinter.LabelFrame(
+        motor_interface_grafica, text="Gerenciamento de filas"
+    )
+    frame_principal_filas.grid(row=0, column=0, padx=10, pady=10)
     interface_gerenciamento_de_filas: InterfaceGerenciamentoDeRecursos = (
         InterfaceGerenciamentoDeRecursos(
             motor_interface_grafica=motor_interface_grafica,
             gerenciador_de_recursos=gerenciador_de_filas,
+            frame_principal=frame_principal_filas,
+            nome_do_recurso="fila",
+        )
+    )
+
+    frame_principal_topicos: tkinter.LabelFrame = tkinter.LabelFrame(
+        motor_interface_grafica, text="Gerenciamento de tópicos"
+    )
+    frame_principal_topicos.grid(row=0, column=1, padx=10, pady=10)
+    interface_gerenciamento_de_topicos: InterfaceGerenciamentoDeRecursos = (
+        InterfaceGerenciamentoDeRecursos(
+            motor_interface_grafica=motor_interface_grafica,
+            gerenciador_de_recursos=gerenciador_de_topicos,
+            frame_principal=frame_principal_topicos,
+            nome_do_recurso="topico",
         )
     )
 
