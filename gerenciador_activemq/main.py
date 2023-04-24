@@ -6,8 +6,9 @@ from gerenciador_activemq.broker.gerenciador_broker import (
     GerenciadorBroker,
     InformacaoRecurso,
 )
+from gerenciador_activemq.interface_grafica.cliente import InterfaceCliente
 from gerenciador_activemq.interface_grafica.controlador_recurso import (
-    Recurso,
+    TipoDeRecurso,
     InterfaceControladorRecurso,
 )
 
@@ -22,21 +23,21 @@ def main():
         nome_do_broker="localhost",
     )
     filas: List[InformacaoRecurso] = gerenciador_broker.obter_filas()
-    topico: List[InformacaoRecurso] = gerenciador_broker.obter_topicos()
+    topicos: List[InformacaoRecurso] = gerenciador_broker.obter_topicos()
 
     frame_gerenciador_broker: tkinter.Frame = tkinter.Frame(motor_interface_grafica)
     interface_controlador_fila: InterfaceControladorRecurso = (
         InterfaceControladorRecurso(
             frame_pai=frame_gerenciador_broker,
-            recurso=Recurso.FILA,
+            recurso=TipoDeRecurso.FILA,
             recursos_iniciais=filas,
         )
     )
     interface_controlador_topico: InterfaceControladorRecurso = (
         InterfaceControladorRecurso(
             frame_pai=frame_gerenciador_broker,
-            recurso=Recurso.TOPICO,
-            recursos_iniciais=topico,
+            recurso=TipoDeRecurso.TOPICO,
+            recursos_iniciais=topicos,
         )
     )
 
@@ -51,6 +52,13 @@ def main():
         nova_janela = tkinter.Toplevel(motor_interface_grafica)
         nova_janela.title(f"cliente - {nome_cliente}")
         nova_janela.resizable(False, False)
+
+        interface_cliente: InterfaceCliente = InterfaceCliente(
+            frame_pai=nova_janela,
+            recursos_disponiveis=[*filas, *topicos],
+        )
+
+        interface_cliente.grid(row=0, column=0, padx=10, pady=10, sticky=tkinter.NSEW)
 
     frame_criar_cliente: tkinter.LabelFrame = tkinter.LabelFrame(
         motor_interface_grafica, text="Criar cliente"

@@ -3,6 +3,7 @@ from typing import List, Any, Dict
 import requests
 
 from gerenciador_activemq.dominio.entidades import InformacaoRecurso
+from gerenciador_activemq.dominio.objetos_de_valor import TipoDeRecurso
 
 
 class GerenciadorBroker:
@@ -51,6 +52,7 @@ class GerenciadorBroker:
             InformacaoRecurso(
                 nome=info_fila["Name"],
                 quantidade_de_mensagens=info_fila["EnqueueCount"],
+                tipo=TipoDeRecurso.FILA,
             )
             for info_fila in resposta["value"].values()
         ]
@@ -63,6 +65,7 @@ class GerenciadorBroker:
             InformacaoRecurso(
                 nome=info_fila["Name"],
                 quantidade_de_mensagens=info_fila["EnqueueCount"],
+                tipo=TipoDeRecurso.TOPICO,
             )
             for info_fila in resposta["value"].values()
         ]

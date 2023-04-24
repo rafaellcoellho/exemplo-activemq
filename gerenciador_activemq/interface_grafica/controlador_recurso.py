@@ -3,7 +3,7 @@ from tkinter import ttk
 from typing import List
 
 from gerenciador_activemq.dominio.entidades import InformacaoRecurso
-from gerenciador_activemq.dominio.objetos_de_valor import Recurso
+from gerenciador_activemq.dominio.objetos_de_valor import TipoDeRecurso
 from gerenciador_activemq.interface_grafica.tabela import Tabela
 
 
@@ -11,20 +11,22 @@ class InterfaceControladorRecurso(tkinter.LabelFrame):
     def __init__(
         self,
         frame_pai: tkinter.Frame,
-        recurso: Recurso,
+        recurso: TipoDeRecurso,
         recursos_iniciais: List[InformacaoRecurso],
     ):
         super().__init__(
             frame_pai,
             text="gerenciador de filas"
-            if recurso == Recurso.FILA
+            if recurso == TipoDeRecurso.FILA
             else "gerenciador de tópicos",
         )
 
         self.frame_adicionar_recurso: tkinter.Frame = tkinter.Frame(self)
         self.label_nome_recurso: tkinter.Label = tkinter.Label(
             self.frame_adicionar_recurso,
-            text="Nome da fila:" if recurso == Recurso.FILA else "Nome do tópico:",
+            text="Nome da fila:"
+            if recurso == TipoDeRecurso.FILA
+            else "Nome do tópico:",
             width=15,
         )
         self.entrada_nome_recurso: tkinter.Entry = tkinter.Entry(
