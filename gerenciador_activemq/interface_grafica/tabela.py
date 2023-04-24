@@ -89,3 +89,6 @@ class Tabela(tkinter.Frame):
     def adicionar_linha(self, linha: InformacaoRecurso):
         self.linhas.append(linha)
         self._reconstruir_linhas()
+
+    def linha_ja_existe(self, nome: str) -> bool:
+        return any(linha.nome == nome for linha in self.linhas)

@@ -1,5 +1,5 @@
 import tkinter
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from typing import List
 
 from gerenciador_activemq.dominio.recurso import InformacaoRecurso
@@ -60,6 +60,17 @@ class InterfaceControladorRecurso(tkinter.LabelFrame):
 
     def _adicionar_recurso(self):
         nome_recurso: str = self.entrada_nome_recurso.get()
+
+        if nome_recurso == "":
+            messagebox.showerror("Erro", "Nome não pode ser vazio")
+            return
+        if self.tabela.linha_ja_existe(nome_recurso):
+            messagebox.showerror(
+                "Erro",
+                f"Já existe {'fila' if self.recurso == TipoDeRecurso.FILA else 'tópico'} com nome {nome_recurso}",
+            )
+            return
+
         self.entrada_nome_recurso.delete(0, tkinter.END)
         self.tabela.adicionar_linha(
             linha=InformacaoRecurso(
