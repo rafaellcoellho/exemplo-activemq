@@ -123,6 +123,7 @@ def main():
         gerenciador_recurso.adicionar_fila(nome_cliente)
         interface_cliente: InterfaceCliente = InterfaceCliente(
             frame_pai=nova_janela,
+            nome_do_cliente=nome_cliente,
         )
 
         interface_cliente.grid(row=0, column=0, padx=10, pady=10, sticky=tkinter.NSEW)
