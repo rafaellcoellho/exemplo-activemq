@@ -22,20 +22,20 @@ def main():
     )
     filas: List[InformacaoRecurso] = gerenciador_broker.obter_filas()
     topico: List[InformacaoRecurso] = gerenciador_broker.obter_topicos()
-    print(filas)
-    print(topico)
 
     frame_gerenciador_broker: tkinter.Frame = tkinter.Frame(motor_interface_grafica)
     interface_controlador_fila: InterfaceControladorRecurso = (
         InterfaceControladorRecurso(
             frame_pai=frame_gerenciador_broker,
             recurso=Recurso.FILA,
+            recursos_iniciais=filas,
         )
     )
     interface_controlador_topico: InterfaceControladorRecurso = (
         InterfaceControladorRecurso(
             frame_pai=frame_gerenciador_broker,
             recurso=Recurso.TOPICO,
+            recursos_iniciais=topico,
         )
     )
 
