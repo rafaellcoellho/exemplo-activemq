@@ -1,9 +1,20 @@
+from enum import Enum
 from typing import List, Any, Dict
 
 import requests
 
-from gerenciador_activemq.dominio.entidade import InformacaoRecurso
 from gerenciador_activemq.dominio.objeto_de_valor import TipoDeRecurso
+
+
+class TipoDeOperacao(Enum):
+    CRIAR_FILA = "addQueue"
+    CRIAR_TOPICO = "addTopic"
+    REMOVER_FILA = "removeQueue"
+    REMOVER_TOPICO = "removeTopic"
+
+
+class NaoFoiPossivelRealizarOperacao(Exception):
+    pass
 
 
 class GerenciadorBroker:
@@ -44,28 +55,22 @@ class GerenciadorBroker:
         )
         return resultado.json()
 
-    def obter_filas(self) -> List[InformacaoRecurso]:
+    def obter_recurso(
+        self, tipo: TipoDeRecurso, atributos: List[str]
+    ) -> Dict[str, Any]:
+        nome_do_objeto: str = "Queue" if tipo == TipoDeRecurso.FILA else "Topic"
         resposta: GerenciadorBroker.ResultadoAPI = self._ler_objetos(
-            "Queue", ["Name", "EnqueueCount"]
+            nome_do_objeto=nome_do_objeto,
+            atributos=atributos,
         )
-        return [
-            InformacaoRecurso(
-                nome=info_fila["Name"],
-                quantidade_de_mensagens=info_fila["EnqueueCount"],
-                tipo=TipoDeRecurso.FILA,
-            )
-            for info_fila in resposta["value"].values()
-        ]
+        return resposta["value"].values()
 
-    def obter_topicos(self) -> List[InformacaoRecurso]:
-        resposta: GerenciadorBroker.ResultadoAPI = self._ler_objetos(
-            "Topic", ["Name", "EnqueueCount"]
+    def executar_operacao(self, tipo_de_operacao: TipoDeOperacao, nome_do_recurso: str):
+        nome_da_operacao: str = tipo_de_operacao.value
+
+        resultado: GerenciadorBroker.ResultadoAPI = self._executar_operacao(
+            nome_da_operacao=nome_da_operacao,
+            argumentos=[nome_do_recurso],
         )
-        return [
-            InformacaoRecurso(
-                nome=info_fila["Name"],
-                quantidade_de_mensagens=info_fila["EnqueueCount"],
-                tipo=TipoDeRecurso.TOPICO,
-            )
-            for info_fila in resposta["value"].values()
-        ]
+        if resultado["status"] != 200:
+            raise NaoFoiPossivelRealizarOperacao(resultado)

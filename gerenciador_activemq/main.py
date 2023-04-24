@@ -1,11 +1,5 @@
 import tkinter
-from tkinter import messagebox
-from typing import List
 
-from gerenciador_activemq.broker.gerenciador_broker import (
-    GerenciadorBroker,
-    InformacaoRecurso,
-)
 from gerenciador_activemq.interface_grafica.cliente import InterfaceCliente
 from gerenciador_activemq.interface_grafica.controlador_recurso import (
     TipoDeRecurso,
@@ -18,26 +12,19 @@ def main():
     motor_interface_grafica.title("gerenciador broker")
     motor_interface_grafica.resizable(False, False)
 
-    gerenciador_broker = GerenciadorBroker(
-        url_base="http://127.0.0.1:8161/api/jolokia",
-        nome_do_broker="localhost",
-    )
-    filas: List[InformacaoRecurso] = gerenciador_broker.obter_filas()
-    topicos: List[InformacaoRecurso] = gerenciador_broker.obter_topicos()
-
     frame_gerenciador_broker: tkinter.Frame = tkinter.Frame(motor_interface_grafica)
     interface_controlador_fila: InterfaceControladorRecurso = (
         InterfaceControladorRecurso(
             frame_pai=frame_gerenciador_broker,
             recurso=TipoDeRecurso.FILA,
-            recursos_iniciais=filas,
+            recursos_iniciais=[],
         )
     )
     interface_controlador_topico: InterfaceControladorRecurso = (
         InterfaceControladorRecurso(
             frame_pai=frame_gerenciador_broker,
             recurso=TipoDeRecurso.TOPICO,
-            recursos_iniciais=topicos,
+            recursos_iniciais=[],
         )
     )
 
@@ -45,9 +32,9 @@ def main():
         nome_cliente: str = entrada_nome_cliente.get()
         entrada_nome_cliente.delete(0, tkinter.END)
 
-        if nome_cliente in [fila.nome for fila in filas]:
-            messagebox.showerror("Erro", "Já existe um cliente com esse nome")
-            return
+        # if nome_cliente in [fila.nome for fila in filas]:
+        #     messagebox.showerror("Erro", "Já existe um cliente com esse nome")
+        #     return
 
         nova_janela = tkinter.Toplevel(motor_interface_grafica)
         nova_janela.title(f"cliente - {nome_cliente}")
@@ -55,7 +42,7 @@ def main():
 
         interface_cliente: InterfaceCliente = InterfaceCliente(
             frame_pai=nova_janela,
-            recursos_disponiveis=[*filas, *topicos],
+            recursos_disponiveis=[],
         )
 
         interface_cliente.grid(row=0, column=0, padx=10, pady=10, sticky=tkinter.NSEW)
