@@ -1,5 +1,6 @@
 import tkinter
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Dict, List, NewType, Tuple, Optional, Callable
 
 
@@ -164,6 +165,16 @@ class InterfaceGerenciamentoDeRecursos:
         )
 
 
+def obter_mensagens_formatadas_para_mostrar(mensagens: List[dict]) -> str:
+    mensagens_formatadas: str = ""
+    for mensagem in mensagens:
+        horario: datetime = datetime.strptime(mensagem["hora_envio"], "%H:%M:%S")
+        mensagens_formatadas += (
+            f"{horario} {mensagem['remetente']}: {mensagem['conteudo']}\n"
+        )
+    return mensagens_formatadas
+
+
 class InterfaceCliente:
     def __init__(
         self, motor_interface_grafica: tkinter.Tk, frame_principal: tkinter.LabelFrame
@@ -171,10 +182,83 @@ class InterfaceCliente:
         self.motor_interface_grafica: tkinter.Tk = motor_interface_grafica
         self.frame_principal: tkinter.LabelFrame = frame_principal
 
+        self.frame_dos_seletores: tkinter.Frame = tkinter.Frame(self.frame_principal)
+        self.frame_de_mensagens: tkinter.Frame = tkinter.Frame(self.frame_principal)
 
-def instanciar_novo_cliente(motor_interface_grafica: tkinter.Tk):
+        self.seletor_de_fila: tkinter.Listbox = tkinter.Listbox(
+            self.frame_dos_seletores
+        )
+        self.seletor_de_topico: tkinter.Listbox = tkinter.Listbox(
+            self.frame_dos_seletores
+        )
+        self.visualizador_de_mensagens: tkinter.Text = tkinter.Text(
+            self.frame_de_mensagens, state=tkinter.DISABLED, width=50, height=20
+        )
+        self.entrada_de_texto_para_mensagem: tkinter.Entry = tkinter.Entry(
+            self.frame_de_mensagens
+        )
+        self.botao_enviar_message: tkinter.Button = tkinter.Button(
+            self.frame_de_mensagens, text="Enviar"
+        )
+
+        self._configurar_interface_seletor_de_recursos()
+        self._configurar_interface_de_mensagens()
+
+    def _configurar_interface_seletor_de_recursos(self):
+        self.frame_dos_seletores.grid(row=0, column=0, padx=10, pady=10)
+        self.seletor_de_fila.grid(row=0, column=0)
+        self.seletor_de_topico.grid(row=1, column=0)
+
+        self.seletor_de_fila.bind("<<ListboxSelect>>", self._mostrar_mensagens)
+        self.seletor_de_topico.bind("<<ListboxSelect>>", self._mostrar_mensagens)
+
+    def _configurar_interface_de_mensagens(self):
+        self.frame_de_mensagens.grid(row=0, column=1, padx=10, pady=10)
+        self.visualizador_de_mensagens.grid(row=0, column=0, columnspan=2)
+        self.entrada_de_texto_para_mensagem.grid(row=1, column=0, sticky="we")
+        self.botao_enviar_message.grid(row=1, column=1, sticky="we")
+
+    def _mostrar_mensagens(self, evento: tkinter.Event):
+        self.visualizador_de_mensagens.delete(1.0, tkinter.END)
+
+        widget_selecionado: tkinter.Listbox = evento.widget
+        if len(widget_selecionado.curselection()) == 0:
+            return
+        indice_selecionado: int = widget_selecionado.curselection()[0]
+        nome_do_recurso: str = widget_selecionado.get(indice_selecionado)
+        print(f"fila selecionada: {nome_do_recurso}")
+
+        exemplo_de_mensagens = [
+            {
+                "remetente": "cliente1",
+                "conteudo": "mensagem 1",
+                "hora_envio": datetime.utcnow(),
+            },
+            {
+                "remetente": "cliente2",
+                "conteudo": "mensagem 2",
+                "hora_envio": datetime.utcnow(),
+            },
+        ]
+
+        mensagens_formatadas_para_mostrar: str = (
+            obter_mensagens_formatadas_para_mostrar(exemplo_de_mensagens)
+        )
+        self.visualizador_de_mensagens.insert(
+            tkinter.END, mensagens_formatadas_para_mostrar
+        )
+
+
+def instanciar_novo_cliente(motor_interface_grafica: tkinter.Tk, nome_do_cliente: str):
     nova_janela = tkinter.Toplevel(motor_interface_grafica)
-    nova_janela.title("Novo Cliente")
+    nova_janela.title(f"cliente - {nome_do_cliente}")
+    nova_janela.resizable(False, False)
+
+    interface_cliente: InterfaceCliente = InterfaceCliente(
+        motor_interface_grafica=motor_interface_grafica,
+        frame_principal=tkinter.LabelFrame(nova_janela, text=nome_do_cliente),
+    )
+    interface_cliente.frame_principal.grid(row=0, column=0, padx=10, pady=10)
 
 
 def modo_exemplo_interface_grafica():
@@ -182,7 +266,8 @@ def modo_exemplo_interface_grafica():
     gerenciador_de_topicos: GerenciadorDeRecursos = GerenciadorDeRecursos()
 
     motor_interface_grafica: tkinter.Tk = tkinter.Tk()
-    motor_interface_grafica.title("Poc Interface Grafica")
+    motor_interface_grafica.title("poc interface grafica")
+    motor_interface_grafica.resizable(False, False)
 
     frame_principal_filas: tkinter.LabelFrame = tkinter.LabelFrame(
         motor_interface_grafica, text="Gerenciamento de filas"
@@ -210,12 +295,23 @@ def modo_exemplo_interface_grafica():
         )
     )
 
-    botao_para_criar_novo_cliente: tkinter.Button = tkinter.Button(
-        motor_interface_grafica,
-        text="Criar novo cliente",
-        command=lambda: instanciar_novo_cliente(motor_interface_grafica),
+    interface_criar_novo_cliente: tkinter.LabelFrame = tkinter.LabelFrame(
+        motor_interface_grafica, text="Criar novo cliente"
     )
-    botao_para_criar_novo_cliente.grid(row=1, column=0, columnspan=2, padx=10, pady=10)
+    interface_criar_novo_cliente.grid(row=1, column=0, columnspan=2, padx=10, pady=10)
+    entrada_para_nome_do_cliente: tkinter.Entry = tkinter.Entry(
+        interface_criar_novo_cliente,
+    )
+    entrada_para_nome_do_cliente.grid(row=0, column=0, padx=10, pady=10)
+    botao_para_criar_novo_cliente: tkinter.Button = tkinter.Button(
+        interface_criar_novo_cliente,
+        text="criar",
+        command=lambda: instanciar_novo_cliente(
+            motor_interface_grafica, entrada_para_nome_do_cliente.get()
+        ),
+    )
+    botao_para_criar_novo_cliente.grid(row=0, column=1, padx=10, pady=10)
+
     motor_interface_grafica.mainloop()
 
 
