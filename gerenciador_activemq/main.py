@@ -6,7 +6,6 @@ from gerenciador_activemq.dominio.recurso import (
     GerenciadorRecurso,
     NomeDoRecurso,
     OuvinteGerenciadorRecurso,
-    InformacaoRecurso,
 )
 from gerenciador_activemq.dominio.utilitarios import TipoDeRecurso
 from gerenciador_activemq.interface_grafica.cliente import InterfaceCliente
@@ -34,31 +33,11 @@ class OuvinteInterfaceControladorRecurso(OuvinteControladorRecurso):
 
 
 class OuvinteRecurso(OuvinteGerenciadorRecurso):
-    def __init__(
-        self,
-        interface_controlador_filas: InterfaceControladorRecurso,
-        interface_controlador_topico: InterfaceControladorRecurso,
-    ):
-        self.interface_controlador_filas: InterfaceControladorRecurso = (
-            interface_controlador_filas
-        )
-        self.interface_controlador_topico: InterfaceControladorRecurso = (
-            interface_controlador_topico
-        )
-
     def ao_adicionar_fila(self, nome: NomeDoRecurso):
-        self.interface_controlador_filas.adicionar_recurso(
-            recurso=InformacaoRecurso(
-                nome=nome, quantidade_de_mensagens=0, tipo=TipoDeRecurso.FILA
-            )
-        )
+        pass
 
     def ao_adicionar_topico(self, nome: NomeDoRecurso):
-        self.interface_controlador_topico.adicionar_recurso(
-            recurso=InformacaoRecurso(
-                nome=nome, quantidade_de_mensagens=0, tipo=TipoDeRecurso.TOPICO
-            )
-        )
+        pass
 
     def ao_remover_fila(self, nome: NomeDoRecurso):
         pass
@@ -101,12 +80,7 @@ def main():
         ouvinte=OuvinteInterfaceControladorRecurso(gerenciador_recurso)
     )
 
-    gerenciador_recurso.adicionar_ouvinte(
-        ouvinte=OuvinteRecurso(
-            interface_controlador_filas=interface_controlador_fila,
-            interface_controlador_topico=interface_controlador_topico,
-        )
-    )
+    gerenciador_recurso.adicionar_ouvinte(ouvinte=OuvinteRecurso())
 
     def criar_cliente():
         nome_cliente: str = entrada_nome_cliente.get()
