@@ -96,3 +96,6 @@ class InterfaceControladorRecurso(tkinter.LabelFrame):
     def remover_ouvinte(self, indice: int):
         self.ouvintes.pop(indice)
         self.tabela.remover_ouvinte(indice)
+
+    def adicionar_recurso(self, recurso: InformacaoRecurso):
+        self.tabela.adicionar_linha(recurso)

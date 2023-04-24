@@ -2,7 +2,12 @@ import tkinter
 from tkinter import messagebox
 
 from gerenciador_activemq.broker.gerenciador_broker import GerenciadorBroker
-from gerenciador_activemq.dominio.recurso import GerenciadorRecurso, NomeDoRecurso
+from gerenciador_activemq.dominio.recurso import (
+    GerenciadorRecurso,
+    NomeDoRecurso,
+    OuvinteGerenciadorRecurso,
+    InformacaoRecurso,
+)
 from gerenciador_activemq.dominio.utilitarios import TipoDeRecurso
 from gerenciador_activemq.interface_grafica.cliente import InterfaceCliente
 from gerenciador_activemq.interface_grafica.controlador_recurso import (
@@ -26,6 +31,40 @@ class OuvinteInterfaceControladorRecurso(OuvinteControladorRecurso):
             self.gerenciador_recurso.remover_fila(nome)
         elif tipo == TipoDeRecurso.TOPICO:
             self.gerenciador_recurso.remover_topico(nome)
+
+
+class OuvinteRecurso(OuvinteGerenciadorRecurso):
+    def __init__(
+        self,
+        interface_controlador_filas: InterfaceControladorRecurso,
+        interface_controlador_topico: InterfaceControladorRecurso,
+    ):
+        self.interface_controlador_filas: InterfaceControladorRecurso = (
+            interface_controlador_filas
+        )
+        self.interface_controlador_topico: InterfaceControladorRecurso = (
+            interface_controlador_topico
+        )
+
+    def ao_adicionar_fila(self, nome: NomeDoRecurso):
+        self.interface_controlador_filas.adicionar_recurso(
+            recurso=InformacaoRecurso(
+                nome=nome, quantidade_de_mensagens=0, tipo=TipoDeRecurso.FILA
+            )
+        )
+
+    def ao_adicionar_topico(self, nome: NomeDoRecurso):
+        self.interface_controlador_topico.adicionar_recurso(
+            recurso=InformacaoRecurso(
+                nome=nome, quantidade_de_mensagens=0, tipo=TipoDeRecurso.TOPICO
+            )
+        )
+
+    def ao_remover_fila(self, nome: NomeDoRecurso):
+        pass
+
+    def ao_remover_topico(self, nome: NomeDoRecurso):
+        pass
 
 
 def main():
@@ -62,6 +101,13 @@ def main():
         ouvinte=OuvinteInterfaceControladorRecurso(gerenciador_recurso)
     )
 
+    gerenciador_recurso.adicionar_ouvinte(
+        ouvinte=OuvinteRecurso(
+            interface_controlador_filas=interface_controlador_fila,
+            interface_controlador_topico=interface_controlador_topico,
+        )
+    )
+
     def criar_cliente():
         nome_cliente: str = entrada_nome_cliente.get()
         entrada_nome_cliente.delete(0, tkinter.END)
@@ -74,6 +120,7 @@ def main():
         nova_janela.title(f"cliente - {nome_cliente}")
         nova_janela.resizable(False, False)
 
+        gerenciador_recurso.adicionar_fila(nome_cliente)
         interface_cliente: InterfaceCliente = InterfaceCliente(
             frame_pai=nova_janela,
             recursos_disponiveis=[],

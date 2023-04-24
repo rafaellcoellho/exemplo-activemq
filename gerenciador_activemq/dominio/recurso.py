@@ -100,12 +100,22 @@ class GerenciadorRecurso:
         self.gerenciador_broker.executar_operacao(
             tipo_de_operacao=TipoDeOperacao.CRIAR_FILA, nome_do_recurso=nome
         )
+        self.informacoes.append(
+            InformacaoRecurso(
+                nome=nome, quantidade_de_mensagens=0, tipo=TipoDeRecurso.FILA
+            )
+        )
         for ouvinte in self.ouvintes:
             ouvinte.ao_adicionar_fila(nome)
 
     def adicionar_topico(self, nome: str):
         self.gerenciador_broker.executar_operacao(
             tipo_de_operacao=TipoDeOperacao.CRIAR_TOPICO, nome_do_recurso=nome
+        )
+        self.informacoes.append(
+            InformacaoRecurso(
+                nome=nome, quantidade_de_mensagens=0, tipo=TipoDeRecurso.TOPICO
+            )
         )
         for ouvinte in self.ouvintes:
             ouvinte.ao_adicionar_topico(nome)
@@ -114,6 +124,9 @@ class GerenciadorRecurso:
         self.gerenciador_broker.executar_operacao(
             tipo_de_operacao=TipoDeOperacao.REMOVER_FILA, nome_do_recurso=nome
         )
+        self.informacoes = [
+            informacao for informacao in self.informacoes if informacao.nome != nome
+        ]
         for ouvinte in self.ouvintes:
             ouvinte.ao_remover_fila(nome)
 
@@ -121,12 +134,14 @@ class GerenciadorRecurso:
         self.gerenciador_broker.executar_operacao(
             tipo_de_operacao=TipoDeOperacao.REMOVER_TOPICO, nome_do_recurso=nome
         )
+        self.informacoes = [
+            informacao for informacao in self.informacoes if informacao.nome != nome
+        ]
         for ouvinte in self.ouvintes:
             ouvinte.ao_remover_topico(nome)
 
     def adicionar_ouvinte(self, ouvinte: OuvinteGerenciadorRecurso) -> int:
         self.ouvintes.append(ouvinte)
-
         return len(self.ouvintes) - 1
 
     def remover_ouvinte(self, indice: int):
