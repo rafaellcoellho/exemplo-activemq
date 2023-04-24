@@ -5,6 +5,10 @@ from gerenciador_activemq.broker.gerenciador_broker import (
     GerenciadorBroker,
     InformacaoRecurso,
 )
+from gerenciador_activemq.interface_grafica.controlador_recurso import (
+    Recurso,
+    InterfaceControladorRecurso,
+)
 
 
 def main():
@@ -20,6 +24,24 @@ def main():
     topico: List[InformacaoRecurso] = gerenciador_broker.obter_topicos()
     print(filas)
     print(topico)
+
+    frame_gerenciador_broker: tkinter.Frame = tkinter.Frame(motor_interface_grafica)
+    interface_controlador_fila: InterfaceControladorRecurso = (
+        InterfaceControladorRecurso(
+            frame_pai=frame_gerenciador_broker,
+            recurso=Recurso.FILA,
+        )
+    )
+    interface_controlador_topico: InterfaceControladorRecurso = (
+        InterfaceControladorRecurso(
+            frame_pai=frame_gerenciador_broker,
+            recurso=Recurso.TOPICO,
+        )
+    )
+
+    frame_gerenciador_broker.grid(row=0, column=0, padx=10, pady=10)
+    interface_controlador_fila.grid(row=0, column=0, sticky=tkinter.NSEW)
+    interface_controlador_topico.grid(row=1, column=0, sticky=tkinter.NSEW)
 
     motor_interface_grafica.mainloop()
 
