@@ -1,24 +1,10 @@
 import tkinter
-from typing import List
-
-from gerenciador_activemq.dominio.recurso import InformacaoRecurso
-from gerenciador_activemq.dominio.utilitarios import TipoDeRecurso
+from tkinter import ttk
 
 
 class InterfaceCliente(tkinter.Frame):
-    def __init__(
-        self, frame_pai: tkinter.Toplevel, recursos_disponiveis: List[InformacaoRecurso]
-    ):
+    def __init__(self, frame_pai: tkinter.Toplevel):
         super().__init__(frame_pai)
-
-        self.frame_do_seletor_de_recurso: tkinter.LabelFrame = tkinter.LabelFrame(
-            self, text="Recursos"
-        )
-        self.seletor_de_recurso: tkinter.Listbox = tkinter.Listbox(
-            self.frame_do_seletor_de_recurso, width=30, height=21
-        )
-        self._adicionar_recursos_a_lista(recursos_disponiveis)
-        self._configurar_interface_dos_seletores()
 
         self.frame_de_mensagens: tkinter.LabelFrame = tkinter.LabelFrame(
             self, text="Mensagens"
@@ -26,54 +12,49 @@ class InterfaceCliente(tkinter.Frame):
         self.visualizador_de_mensagens: tkinter.Text = tkinter.Text(
             self.frame_de_mensagens, state=tkinter.DISABLED, width=50, height=20
         )
-        self.entrada_de_texto_para_mensagem: tkinter.Entry = tkinter.Entry(
-            self.frame_de_mensagens
+        self.combobox_fila_ou_topico: ttk.Combobox = ttk.Combobox(
+            self.frame_de_mensagens, values=["Fila", "Tópico"], state="readonly"
         )
+        self.combobox_fila_ou_topico.current(0)
+        self.nome_do_recurso: tkinter.Entry = tkinter.Entry(self.frame_de_mensagens)
+        self.conteudo_mensagem: tkinter.Entry = tkinter.Entry(self.frame_de_mensagens)
         self.botao_enviar_message: tkinter.Button = tkinter.Button(
             self.frame_de_mensagens, text="Enviar", command=self._enviar_mensagem
         )
+        self.label_para_entrada_de_nome_topico_para_assinar: tkinter.Label = (
+            tkinter.Label(self.frame_de_mensagens, text="Nome do tópico para assinar:")
+        )
+        self.entrada_nome_topico_para_assinar: tkinter.Entry = tkinter.Entry(
+            self.frame_de_mensagens,
+        )
+        self.botao_confirmar_assinar_topico: tkinter.Button = tkinter.Button(
+            self.frame_de_mensagens,
+            text="Assinar",
+            command=self._assinar_topico,
+        )
         self._configurar_interface_de_mensagens()
 
-    def _configurar_interface_dos_seletores(self):
-        self.frame_do_seletor_de_recurso.grid(row=0, column=0, padx=10, pady=10)
-        self.seletor_de_recurso.grid(row=0, column=0)
-
-        self.seletor_de_recurso.bind("<<ListboxSelect>>", self._ao_selecionar_recurso)
-
     def _configurar_interface_de_mensagens(self):
-        self.frame_de_mensagens.grid(row=0, column=1, padx=10, pady=10)
-        self.visualizador_de_mensagens.grid(row=0, column=0, columnspan=2)
-        self.entrada_de_texto_para_mensagem.grid(row=1, column=0, sticky="we")
-        self.botao_enviar_message.grid(row=1, column=1, sticky="we")
+        self.frame_de_mensagens.grid(row=0, column=0, padx=10, pady=10)
+        self.visualizador_de_mensagens.grid(row=0, column=0, columnspan=4)
+        self.combobox_fila_ou_topico.grid(row=1, column=0, sticky="we")
+        self.nome_do_recurso.grid(row=1, column=1, sticky="we")
+        self.conteudo_mensagem.grid(row=1, column=2, sticky="we")
+        self.botao_enviar_message.grid(row=1, column=3, sticky="we")
+        self.label_para_entrada_de_nome_topico_para_assinar.grid(
+            row=2, column=0, sticky="we"
+        )
+        self.entrada_nome_topico_para_assinar.grid(
+            row=2, column=1, columnspan=2, sticky="we"
+        )
+        self.botao_confirmar_assinar_topico.grid(row=2, column=3, sticky="we")
 
     def _enviar_mensagem(self):
-        mensagem: str = self.entrada_de_texto_para_mensagem.get()
-        self.entrada_de_texto_para_mensagem.delete(0, tkinter.END)
+        mensagem: str = self.conteudo_mensagem.get()
+        self.conteudo_mensagem.delete(0, tkinter.END)
         print(mensagem)
 
-    def _adicionar_recursos_a_lista(
-        self, recursos_disponiveis: List[InformacaoRecurso]
-    ):
-        for recurso in recursos_disponiveis:
-            tipo_de_recurso: str = "F" if recurso.tipo == TipoDeRecurso.FILA else "T"
-            self.seletor_de_recurso.insert(
-                tkinter.END, f"{tipo_de_recurso} | {recurso.nome}"
-            )
-
-    def _ao_selecionar_recurso(self, evento: tkinter.Event):
-        widget_selecionado: tkinter.Listbox = evento.widget
-        if len(widget_selecionado.curselection()) == 0:
-            return
-        indice_selecionado: int = widget_selecionado.curselection()[0]
-
-        tipo = (
-            "fila"
-            if widget_selecionado.get(indice_selecionado).split(" | ")[0] == "F"
-            else "topico"
-        )
-        nome_do_recurso: str = widget_selecionado.get(indice_selecionado).split(" | ")[
-            1
-        ]
-        print(f"Selecionado {tipo} {nome_do_recurso}")
-
-        self.visualizador_de_mensagens.delete(1.0, tkinter.END)
+    def _assinar_topico(self):
+        nome_topico: str = self.entrada_nome_topico_para_assinar.get()
+        self.entrada_nome_topico_para_assinar.delete(0, tkinter.END)
+        print(nome_topico)
