@@ -2,11 +2,16 @@ import tkinter
 from typing import List
 
 from gerenciador_activemq.dominio.recurso import InformacaoRecurso
+from gerenciador_activemq.dominio.utilitarios import TipoDeRecurso
+from gerenciador_activemq.interface_grafica.ouvinte import OuvinteControladorRecurso
 
 
 class Tabela(tkinter.Frame):
     def __init__(
-        self, frame_pai: tkinter.Frame, linhas_iniciais: List[InformacaoRecurso]
+        self,
+        frame_pai: tkinter.Frame,
+        linhas_iniciais: List[InformacaoRecurso],
+        recurso: TipoDeRecurso,
     ):
         super().__init__(frame_pai)
 
@@ -20,6 +25,9 @@ class Tabela(tkinter.Frame):
             linhas_iniciais
         )
         self._configurar_linhas()
+
+        self.recurso: TipoDeRecurso = recurso
+        self.ouvintes: List[OuvinteControladorRecurso] = []
 
     def _configurar_cabecalho(self):
         for indice, cabecalho in enumerate(self.cabecalho):
@@ -44,7 +52,27 @@ class Tabela(tkinter.Frame):
                 tkinter.Label(
                     self, text=linha.quantidade_de_mensagens, font=("Arial", 10)
                 ),
-                tkinter.Button(self, text="Remover", font=("Arial", 10), width=20),
+                tkinter.Button(
+                    self,
+                    text="Remover",
+                    font=("Arial", 10),
+                    width=20,
+                    command=lambda: self._remover_recurso(linha.nome),
+                ),
             ]
             for linha in linhas_iniciais
         ]
+
+    def _remover_recurso(self, nome: str):
+        for ouvinte in self.ouvintes:
+            ouvinte.ao_remover_recurso(
+                nome=nome,
+                tipo=self.recurso,
+            )
+
+    def adicionar_ouvinte(self, ouvinte: OuvinteControladorRecurso) -> int:
+        self.ouvintes.append(ouvinte)
+        return len(self.ouvintes) - 1
+
+    def remover_ouvinte(self, indice: int):
+        self.ouvintes.pop(indice)
