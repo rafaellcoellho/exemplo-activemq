@@ -63,6 +63,8 @@ class GerenciadorBroker:
             nome_do_objeto=nome_do_objeto,
             atributos=atributos,
         )
+        if not resposta.get("value"):
+            return []
         return resposta["value"].values()
 
     def executar_operacao(self, tipo_de_operacao: TipoDeOperacao, nome_do_recurso: str):
