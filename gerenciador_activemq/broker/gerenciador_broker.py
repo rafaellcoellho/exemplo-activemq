@@ -3,7 +3,7 @@ from typing import List, Any, Dict
 
 import requests
 
-from gerenciador_activemq.dominio.recurso import TipoDeRecurso
+from gerenciador_activemq.dominio.utilitarios import TipoDeRecurso
 
 
 class TipoDeOperacao(Enum):

@@ -1,30 +1,41 @@
 import tkinter
+from tkinter import messagebox
 
+from gerenciador_activemq.broker.gerenciador_broker import GerenciadorBroker
 from gerenciador_activemq.interface_grafica.cliente import InterfaceCliente
 from gerenciador_activemq.interface_grafica.controlador_recurso import (
     InterfaceControladorRecurso,
 )
-from gerenciador_activemq.dominio.recurso import TipoDeRecurso
 
 
 def main():
+    from gerenciador_activemq.dominio.recurso import GerenciadorRecurso
+    from gerenciador_activemq.dominio.utilitarios import TipoDeRecurso
+
     motor_interface_grafica: tkinter.Tk = tkinter.Tk()
     motor_interface_grafica.title("gerenciador broker")
     motor_interface_grafica.resizable(False, False)
+
+    gerenciador_recurso: GerenciadorRecurso = GerenciadorRecurso(
+        gerenciador_broker=GerenciadorBroker(
+            url_base="http://127.0.0.1:8161/api/jolokia",
+            nome_do_broker="localhost",
+        ),
+    )
 
     frame_gerenciador_broker: tkinter.Frame = tkinter.Frame(motor_interface_grafica)
     interface_controlador_fila: InterfaceControladorRecurso = (
         InterfaceControladorRecurso(
             frame_pai=frame_gerenciador_broker,
             recurso=TipoDeRecurso.FILA,
-            recursos_iniciais=[],
+            recursos_iniciais=gerenciador_recurso.obter_filas(),
         )
     )
     interface_controlador_topico: InterfaceControladorRecurso = (
         InterfaceControladorRecurso(
             frame_pai=frame_gerenciador_broker,
             recurso=TipoDeRecurso.TOPICO,
-            recursos_iniciais=[],
+            recursos_iniciais=gerenciador_recurso.obter_topicos(),
         )
     )
 
@@ -32,9 +43,9 @@ def main():
         nome_cliente: str = entrada_nome_cliente.get()
         entrada_nome_cliente.delete(0, tkinter.END)
 
-        # if nome_cliente in [fila.nome for fila in filas]:
-        #     messagebox.showerror("Erro", "Já existe um cliente com esse nome")
-        #     return
+        if nome_cliente in [fila.nome for fila in gerenciador_recurso.obter_filas()]:
+            messagebox.showerror("Erro", "Já existe um cliente com esse nome")
+            return
 
         nova_janela = tkinter.Toplevel(motor_interface_grafica)
         nova_janela.title(f"cliente - {nome_cliente}")
