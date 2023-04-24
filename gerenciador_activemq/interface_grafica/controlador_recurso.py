@@ -61,6 +61,13 @@ class InterfaceControladorRecurso(tkinter.LabelFrame):
     def _adicionar_recurso(self):
         nome_recurso: str = self.entrada_nome_recurso.get()
         self.entrada_nome_recurso.delete(0, tkinter.END)
+        self.tabela.adicionar_linha(
+            linha=InformacaoRecurso(
+                nome=nome_recurso,
+                quantidade_de_mensagens=0,
+                tipo=self.recurso,
+            )
+        )
 
         for ouvinte in self.ouvintes:
             ouvinte.ao_adicionar_recurso(nome_recurso, self.recurso)

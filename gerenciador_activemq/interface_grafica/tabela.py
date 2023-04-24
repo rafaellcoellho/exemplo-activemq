@@ -21,10 +21,9 @@ class Tabela(tkinter.Frame):
         ]
         self._configurar_cabecalho()
 
-        self.linhas: List[List[tkinter.Widget]] = self._obter_widgets_linhas(
-            linhas_iniciais
-        )
-        self._configurar_linhas()
+        self.widgets_das_linhas: List[List[tkinter.Widget]] = []
+        self.linhas: List[InformacaoRecurso] = linhas_iniciais
+        self._reconstruir_linhas()
 
         self.recurso: TipoDeRecurso = recurso
         self.ouvintes: List[OuvinteControladorRecurso] = []
@@ -34,7 +33,7 @@ class Tabela(tkinter.Frame):
             cabecalho.grid(row=0, column=indice, pady=5, sticky=tkinter.NSEW)
 
     def _configurar_linhas(self):
-        for indice_linha, linha in enumerate(self.linhas):
+        for indice_linha, linha in enumerate(self.widgets_das_linhas):
             for indice_coluna, coluna in enumerate(linha):
                 coluna.grid(
                     row=indice_linha + 1,
@@ -57,18 +56,28 @@ class Tabela(tkinter.Frame):
                     text="Remover",
                     font=("Arial", 10),
                     width=20,
-                    command=lambda: self._remover_recurso(linha.nome),
+                    command=lambda: self._remover_recurso(linha.nome, indice),
                 ),
             ]
-            for linha in linhas_iniciais
+            for indice, linha in enumerate(linhas_iniciais)
         ]
 
-    def _remover_recurso(self, nome: str):
+    def _remover_recurso(self, nome: str, indice: int):
+        self.linhas.pop(indice)
+        self._reconstruir_linhas()
         for ouvinte in self.ouvintes:
             ouvinte.ao_remover_recurso(
                 nome=nome,
                 tipo=self.recurso,
             )
+
+    def _reconstruir_linhas(self):
+        if len(self.widgets_das_linhas) > 0:
+            for linha in self.widgets_das_linhas:
+                for widget in linha:
+                    widget.destroy()
+        self.widgets_das_linhas = self._obter_widgets_linhas(self.linhas)
+        self._configurar_linhas()
 
     def adicionar_ouvinte(self, ouvinte: OuvinteControladorRecurso) -> int:
         self.ouvintes.append(ouvinte)
@@ -76,3 +85,7 @@ class Tabela(tkinter.Frame):
 
     def remover_ouvinte(self, indice: int):
         self.ouvintes.pop(indice)
+
+    def adicionar_linha(self, linha: InformacaoRecurso):
+        self.linhas.append(linha)
+        self._reconstruir_linhas()

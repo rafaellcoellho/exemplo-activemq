@@ -2,16 +2,33 @@ import tkinter
 from tkinter import messagebox
 
 from gerenciador_activemq.broker.gerenciador_broker import GerenciadorBroker
+from gerenciador_activemq.dominio.recurso import GerenciadorRecurso, NomeDoRecurso
+from gerenciador_activemq.dominio.utilitarios import TipoDeRecurso
 from gerenciador_activemq.interface_grafica.cliente import InterfaceCliente
 from gerenciador_activemq.interface_grafica.controlador_recurso import (
     InterfaceControladorRecurso,
 )
+from gerenciador_activemq.interface_grafica.ouvinte import OuvinteControladorRecurso
+
+
+class OuvinteInterfaceControladorRecurso(OuvinteControladorRecurso):
+    def __init__(self, gerenciador_recurso: GerenciadorRecurso):
+        self.gerenciador_recurso: GerenciadorRecurso = gerenciador_recurso
+
+    def ao_adicionar_recurso(self, nome: NomeDoRecurso, tipo: TipoDeRecurso):
+        if tipo == TipoDeRecurso.FILA:
+            self.gerenciador_recurso.adicionar_fila(nome)
+        elif tipo == TipoDeRecurso.TOPICO:
+            self.gerenciador_recurso.adicionar_topico(nome)
+
+    def ao_remover_recurso(self, nome: NomeDoRecurso, tipo: TipoDeRecurso):
+        if tipo == TipoDeRecurso.FILA:
+            self.gerenciador_recurso.remover_fila(nome)
+        elif tipo == TipoDeRecurso.TOPICO:
+            self.gerenciador_recurso.remover_topico(nome)
 
 
 def main():
-    from gerenciador_activemq.dominio.recurso import GerenciadorRecurso
-    from gerenciador_activemq.dominio.utilitarios import TipoDeRecurso
-
     motor_interface_grafica: tkinter.Tk = tkinter.Tk()
     motor_interface_grafica.title("gerenciador broker")
     motor_interface_grafica.resizable(False, False)
@@ -31,12 +48,18 @@ def main():
             recursos_iniciais=gerenciador_recurso.obter_filas(),
         )
     )
+    interface_controlador_fila.adicionar_ouvinte(
+        ouvinte=OuvinteInterfaceControladorRecurso(gerenciador_recurso)
+    )
     interface_controlador_topico: InterfaceControladorRecurso = (
         InterfaceControladorRecurso(
             frame_pai=frame_gerenciador_broker,
             recurso=TipoDeRecurso.TOPICO,
             recursos_iniciais=gerenciador_recurso.obter_topicos(),
         )
+    )
+    interface_controlador_topico.adicionar_ouvinte(
+        ouvinte=OuvinteInterfaceControladorRecurso(gerenciador_recurso)
     )
 
     def criar_cliente():
