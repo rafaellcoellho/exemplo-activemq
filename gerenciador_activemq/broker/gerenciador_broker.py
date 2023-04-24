@@ -1,13 +1,8 @@
-from dataclasses import dataclass
 from typing import List, Any, Dict
 
 import requests
 
-
-@dataclass
-class InformacaoRecurso:
-    nome: str
-    quantidade_de_mensagens: int
+from gerenciador_activemq.dominio.entidades import InformacaoRecurso
 
 
 class GerenciadorBroker:

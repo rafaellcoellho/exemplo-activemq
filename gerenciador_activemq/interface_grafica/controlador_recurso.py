@@ -1,10 +1,6 @@
 import tkinter
-from enum import Enum
 
-
-class Recurso(Enum):
-    FILA = "fila"
-    TOPICO = "tópico"
+from gerenciador_activemq.dominio.objetos_de_valor import Recurso
 
 
 class InterfaceControladorRecurso(tkinter.LabelFrame):
