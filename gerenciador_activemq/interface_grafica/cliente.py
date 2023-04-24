@@ -1,8 +1,7 @@
 import tkinter
 from typing import List
 
-from gerenciador_activemq.dominio.entidade import InformacaoRecurso
-from gerenciador_activemq.dominio.objeto_de_valor import TipoDeRecurso
+from gerenciador_activemq.dominio.recurso import TipoDeRecurso, InformacaoRecurso
 
 
 class InterfaceCliente(tkinter.Frame):

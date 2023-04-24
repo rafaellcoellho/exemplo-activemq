@@ -3,7 +3,7 @@ from typing import List, Any, Dict
 
 import requests
 
-from gerenciador_activemq.dominio.objeto_de_valor import TipoDeRecurso
+from gerenciador_activemq.dominio.recurso import TipoDeRecurso
 
 
 class TipoDeOperacao(Enum):
@@ -57,7 +57,7 @@ class GerenciadorBroker:
 
     def obter_recurso(
         self, tipo: TipoDeRecurso, atributos: List[str]
-    ) -> Dict[str, Any]:
+    ) -> List[Dict[str, Any]]:
         nome_do_objeto: str = "Queue" if tipo == TipoDeRecurso.FILA else "Topic"
         resposta: GerenciadorBroker.ResultadoAPI = self._ler_objetos(
             nome_do_objeto=nome_do_objeto,

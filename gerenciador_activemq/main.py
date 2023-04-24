@@ -2,9 +2,9 @@ import tkinter
 
 from gerenciador_activemq.interface_grafica.cliente import InterfaceCliente
 from gerenciador_activemq.interface_grafica.controlador_recurso import (
-    TipoDeRecurso,
     InterfaceControladorRecurso,
 )
+from gerenciador_activemq.dominio.recurso import TipoDeRecurso
 
 
 def main():

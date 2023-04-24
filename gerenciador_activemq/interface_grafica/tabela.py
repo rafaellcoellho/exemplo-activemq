@@ -1,7 +1,7 @@
 import tkinter
 from typing import List
 
-from gerenciador_activemq.dominio.entidade import InformacaoRecurso
+from gerenciador_activemq.dominio.recurso import InformacaoRecurso
 
 
 class Tabela(tkinter.Frame):
