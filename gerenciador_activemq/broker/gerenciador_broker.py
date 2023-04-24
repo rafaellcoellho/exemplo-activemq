@@ -2,8 +2,8 @@ from typing import List, Any, Dict
 
 import requests
 
-from gerenciador_activemq.dominio.entidades import InformacaoRecurso
-from gerenciador_activemq.dominio.objetos_de_valor import TipoDeRecurso
+from gerenciador_activemq.dominio.entidade import InformacaoRecurso
+from gerenciador_activemq.dominio.objeto_de_valor import TipoDeRecurso
 
 
 class GerenciadorBroker:
